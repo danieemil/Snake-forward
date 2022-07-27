@@ -24,27 +24,57 @@ public class EnemyCorpse : Enemy
         Vector2Int dist = playerPos - currentPos;
         Vector2Int distAbs = new Vector2Int(Mathf.Abs(dist.x), Mathf.Abs(dist.y));
 
-        if (distAbs.x >= distAbs.y)
+        Vector2Int dir = Vector2Int.zero;
+
+        if (dist.x == 0)
         {
-            lookDir = new Vector2Int(dist.x / distAbs.x, 0);
+            dir.x = RandomSign();
+        }
+        else
+        {
+            dir.x = dist.x / distAbs.x;
+        }
+
+        if (dist.y == 0)
+        {
+            dir.y = RandomSign();
+        }
+        else
+        {
+            dir.y = dist.y / distAbs.y;
+        }
+
+        int distDir = distAbs.x - distAbs.y;
+
+        if (distDir == 0)
+        {
+            distDir = RandomSign();
+        }
+
+
+        // Let's try to move towards the player first
+        if (distDir > 0)
+        {
+
+            lookDir = new Vector2Int(dir.x, 0);
             if (checkMove(lookDir))
             {
                 return;
             }
 
-            lookDir = new Vector2Int(0, dist.y / distAbs.y);
+            lookDir = new Vector2Int(0, dir.y);
             if (checkMove(lookDir))
             {
                 return;
             }
 
-            lookDir = new Vector2Int(0, -dist.y / distAbs.y);
+            lookDir = new Vector2Int(0, -dir.y);
             if (checkMove(lookDir))
             {
                 return;
             }
 
-            lookDir = new Vector2Int(-dist.x / distAbs.x, 0);
+            lookDir = new Vector2Int(-dir.x, 0);
             if (checkMove(lookDir))
             {
                 return;
@@ -53,32 +83,40 @@ public class EnemyCorpse : Enemy
         }
         else
         {
-            lookDir = new Vector2Int(0, dist.y / distAbs.y);
+            lookDir = new Vector2Int(0, dir.y);
             if (checkMove(lookDir))
             {
                 return;
             }
 
-            lookDir = new Vector2Int(dist.x / distAbs.x, 0);
+            lookDir = new Vector2Int(dir.x, 0);
             if (checkMove(lookDir))
             {
                 return;
             }
 
-            lookDir = new Vector2Int(-dist.x / distAbs.x, 0);
+            lookDir = new Vector2Int(-dir.x, 0);
             if (checkMove(lookDir))
             {
                 return;
             }
 
-            lookDir = new Vector2Int(0, -dist.y / distAbs.y);
+            lookDir = new Vector2Int(0, -dir.y);
             if (checkMove(lookDir))
             {
                 return;
             }
         }
+    }
 
+    int RandomSign()
+    {
+        if (Random.Range(0, 2) > 0)
+        {
+            return 1;
+        }
 
+        return 0;
     }
 
     protected bool checkMove(Vector2Int dir)
