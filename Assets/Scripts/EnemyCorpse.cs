@@ -7,18 +7,21 @@ public class EnemyCorpse : Enemy
     // Start is called before the first frame update
     void Start()
     {
-        
+        Restart();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (!GameManager.gamePaused)
+        {
+
+        }
     }
 
     protected override void IAInput()
     {
-        Vector2Int playerPos = new Vector2Int((int)game.player.gameObject.transform.position.x, (int)game.player.gameObject.transform.position.y);
+        Vector2Int playerPos = new Vector2Int((int)game.world.player.gameObject.transform.position.x, (int)game.world.player.gameObject.transform.position.y);
         Vector2Int currentPos = new Vector2Int((int)transform.position.x, (int)transform.position.y);
 
         Vector2Int dist = playerPos - currentPos;
@@ -56,57 +59,58 @@ public class EnemyCorpse : Enemy
         if (distDir > 0)
         {
 
-            lookDir = new Vector2Int(dir.x, 0);
-            if (checkMove(lookDir))
+            actualDir = new Vector2Int(dir.x, 0);
+            if (checkMove(actualDir))
             {
                 return;
             }
 
-            lookDir = new Vector2Int(0, dir.y);
-            if (checkMove(lookDir))
+            actualDir = new Vector2Int(0, dir.y);
+            if (checkMove(actualDir))
             {
                 return;
             }
 
-            lookDir = new Vector2Int(0, -dir.y);
-            if (checkMove(lookDir))
+            actualDir = new Vector2Int(0, -dir.y);
+            if (checkMove(actualDir))
             {
                 return;
             }
 
-            lookDir = new Vector2Int(-dir.x, 0);
-            if (checkMove(lookDir))
+            actualDir = new Vector2Int(-dir.x, 0);
+            if (checkMove(actualDir))
             {
                 return;
             }
-
+            
         }
         else
         {
-            lookDir = new Vector2Int(0, dir.y);
-            if (checkMove(lookDir))
+            actualDir = new Vector2Int(0, dir.y);
+            if (checkMove(actualDir))
             {
                 return;
             }
 
-            lookDir = new Vector2Int(dir.x, 0);
-            if (checkMove(lookDir))
+            actualDir = new Vector2Int(dir.x, 0);
+            if (checkMove(actualDir))
             {
                 return;
             }
 
-            lookDir = new Vector2Int(-dir.x, 0);
-            if (checkMove(lookDir))
+            actualDir = new Vector2Int(-dir.x, 0);
+            if (checkMove(actualDir))
             {
                 return;
             }
 
-            lookDir = new Vector2Int(0, -dir.y);
-            if (checkMove(lookDir))
+            actualDir = new Vector2Int(0, -dir.y);
+            if (checkMove(actualDir))
             {
                 return;
             }
         }
+        actualDir = Vector2Int.zero;
     }
 
     int RandomSign()
@@ -122,7 +126,7 @@ public class EnemyCorpse : Enemy
     protected bool checkMove(Vector2Int dir)
     {
 
-        if ((moveDir + dir).magnitude == 0)
+        if ((prevDir + dir).magnitude == 0)
         {
             return false;
         }
@@ -130,7 +134,7 @@ public class EnemyCorpse : Enemy
         Vector2Int currentPos = new Vector2Int((int)transform.position.x, (int)transform.position.y);
         Vector2Int nextPos = new Vector2Int(currentPos.x + dir.x, currentPos.y + dir.y);
 
-        TileType nextTileType = game.map.getTileData(nextPos).tileType;
+        TileType nextTileType = game.world.tilemap.getTileData(nextPos).tileType;
 
         if (nextTileType == TileType.Wall || tail.checkCollision(nextPos))
         {
@@ -144,6 +148,11 @@ public class EnemyCorpse : Enemy
 
     void FixedUpdate()
     {
+        if (game.world.player.level != level)
+        {
+            return;
+        }
+
         if (velFrames <= 1)
         {
             velFrames = velCounter;
@@ -151,9 +160,9 @@ public class EnemyCorpse : Enemy
             IAInput();
 
             Vector2Int currentPos = new Vector2Int((int)transform.position.x, (int)transform.position.y);
-            Vector2Int nextPos = new Vector2Int(currentPos.x + lookDir.x, currentPos.y + lookDir.y);
+            Vector2Int nextPos = new Vector2Int(currentPos.x + actualDir.x, currentPos.y + actualDir.y);
 
-            TileType nextTileType = game.map.getTileData(nextPos).tileType;
+            TileType nextTileType = game.world.tilemap.getTileData(nextPos).tileType;
 
             if (nextTileType == TileType.Wall || tail.checkCollision(nextPos))
             {
@@ -164,14 +173,19 @@ public class EnemyCorpse : Enemy
             if (!currentPos.Equals(nextPos))
             {
                 tail.moveToHead(transform.position, transform.rotation);
-                moveDir = lookDir;
                 transform.position = new Vector3(nextPos.x, nextPos.y);
+                prevDir = actualDir;
             }
         }
         else
         {
             velFrames--;
         }
+    }
+
+    protected override void Restart()
+    {
+        base.Restart();
     }
 
     override public void Die()

@@ -27,19 +27,19 @@ public class PlayerController : Snake
     // Update is called once per frame
     void Update()
     {
-
-        if (changingLevel)
+        if (!GameManager.gamePaused)
         {
-            return;
-        }
+            if (!changingLevel)
+            {
+                Vector2Int tempDir = actualDir;
 
-        Vector2Int tempDir = lookDir;
+                CheckInput();
 
-        CheckInput();
-
-        if ((lookDir + moveDir).magnitude == 0)
-        {
-            lookDir = tempDir;
+                if ((actualDir + prevDir).magnitude == 0)
+                {
+                    actualDir = tempDir;
+                }
+            }
         }
     }
 
@@ -47,32 +47,33 @@ public class PlayerController : Snake
     {
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            lookDir = Vector2Int.left;
+            actualDir = Vector2Int.left;
         }
         else if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
         {
-            lookDir = Vector2Int.up;
+            actualDir = Vector2Int.up;
         }
         else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
         {
-            lookDir = Vector2Int.down;
+            actualDir = Vector2Int.down;
         }
         else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
         {
-            lookDir = Vector2Int.right;
+            actualDir = Vector2Int.right;
         }
     }
 
     private void FixedUpdate()
     {
+
         if (velFrames<=1)
         {
             velFrames = velCounter;
 
             Vector2Int currentPos = new Vector2Int((int)transform.position.x, (int)transform.position.y);
-            Vector2Int nextPos = new Vector2Int(currentPos.x + lookDir.x, currentPos.y + lookDir.y);
+            Vector2Int nextPos = new Vector2Int(currentPos.x + actualDir.x, currentPos.y + actualDir.y);
 
-            TileType nextTileType = game.map.getTileData(nextPos).tileType;
+            TileType nextTileType = game.world.tilemap.getTileData(nextPos).tileType;
 
             if (nextTileType == TileType.Wall || tail.checkCollision(nextPos))
             {
@@ -91,8 +92,8 @@ public class PlayerController : Snake
             if (!currentPos.Equals(nextPos))
             {
                 tail.moveToHead(transform.position, transform.rotation);
-                moveDir = lookDir;
                 transform.position = new Vector3(nextPos.x, nextPos.y);
+                prevDir = actualDir;
             }
         }
         else
@@ -101,13 +102,12 @@ public class PlayerController : Snake
         }
     }
 
-    protected void Restart()
+    override protected void Restart()
     {
-        transform.position = game.map.start.gameObject.transform.position;
-        moveDir = game.map.start.startDirection;
-        lookDir = moveDir;
+        Vector2Int startPos = game.world.getStartPosition();
+        transform.position = new Vector3(startPos.x, startPos.y, transform.position.z);
 
-        velFrames = velCounter;
+        base.Restart();
 
         invencible = false;
     }
@@ -149,6 +149,8 @@ public class PlayerController : Snake
             mainCamera.gameObject.transform.position = bounds.center + new Vector3(0, 0, mainCamera.gameObject.transform.position.z);
 
             changingLevel = true;
+
+            level = collision.gameObject.GetComponent<Level>().number;
             return;
         }
 

@@ -22,7 +22,10 @@ public class Snake : Movable
     // Update is called once per frame
     void Update()
     {
-        
+        if (!GameManager.gamePaused)
+        {
+
+        }
     }
 
     void FixedUpdate()
@@ -32,9 +35,9 @@ public class Snake : Movable
             velFrames = velCounter;
 
             Vector2Int currentPos = new Vector2Int((int)transform.position.x, (int)transform.position.y);
-            Vector2Int nextPos = new Vector2Int(currentPos.x + lookDir.x, currentPos.y + lookDir.y);
+            Vector2Int nextPos = new Vector2Int(currentPos.x + actualDir.x, currentPos.y + actualDir.y);
 
-            TileType nextTileType = game.map.getTileData(nextPos).tileType;
+            TileType nextTileType = game.world.tilemap.getTileData(nextPos).tileType;
 
             if (nextTileType == TileType.Wall || tail.checkCollision(nextPos))
             {
@@ -45,14 +48,24 @@ public class Snake : Movable
             if (!currentPos.Equals(nextPos))
             {
                 tail.moveToHead(transform.position, transform.rotation);
-                moveDir = lookDir;
                 transform.position = new Vector3(nextPos.x, nextPos.y);
+                prevDir = actualDir;
             }
         }
         else
         {
             velFrames--;
         }
+    }
+
+    protected override void Restart()
+    {
+        base.Restart();
+    }
+
+    override public void Pause()
+    {
+
     }
 
     virtual public void Die()

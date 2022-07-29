@@ -10,11 +10,12 @@ public class TilemapManager : MonoBehaviour
     [SerializeField] private Tilemap tilemap;
     [SerializeField] private TileData[] tileDatas;
 
-    public StartPoint start;
+
 
     // The tile dimensions are 1x1 (check assets configurations -> 72 px = 1 unit)
     private Vector2Int tileSize = new Vector2Int(1, 1);
 
+    // Allows getting custom data from tiles
     private Dictionary<TileBase, TileData> tilesDictionary = new Dictionary<TileBase, TileData>();
 
     private void Awake()
@@ -43,6 +44,9 @@ public class TilemapManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (!GameManager.gamePaused)
+        {
+
+        }
     }
 }

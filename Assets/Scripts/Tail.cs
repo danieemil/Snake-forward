@@ -17,7 +17,10 @@ public class Tail : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!GameManager.gamePaused)
+        {
 
+        }
     }
 
     public bool checkCollision(Vector2Int pos)
@@ -77,11 +80,7 @@ public class Tail : MonoBehaviour
 
     public void addObject(Object o)
     {
-        int index = objects.Count - 1;
-        if (index < 0)
-        {
-            index++;
-        }
+        int index = objects.Count;
         objects.Insert(index, o);
         o.inTail = this;
     }
