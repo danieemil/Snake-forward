@@ -61,7 +61,7 @@ public class Movable : MonoBehaviour
 
         velFrames = velCounter;
 
-        level = game.world.getLevel(new Vector2Int((int)transform.position.x, (int)transform.position.y));
+        level = game.world.GetLevel(new Vector2Int((int)transform.position.x, (int)transform.position.y));
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

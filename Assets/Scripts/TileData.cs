@@ -18,7 +18,7 @@ public enum TileType
 [CreateAssetMenu]
 public class TileData : ScriptableObject
 {
-    [SerializeField] public TileBase[] tiles;
+    public TileBase[] tiles;
 
-    [SerializeField] public TileType tileType = TileType.Void; 
+    public TileType tileType = TileType.Void; 
 }

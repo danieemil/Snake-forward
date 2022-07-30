@@ -30,7 +30,7 @@ public class Level : MonoBehaviour
         }
     }
 
-    public bool isInside(Vector2Int pos)
+    public bool IsInside(Vector2Int pos)
     {
         return bCollider.bounds.Contains(new Vector3(pos.x, pos.y, bCollider.bounds.center.z));
     }

@@ -2,6 +2,66 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+public class InputDirBuffer
+{
+    private const int capacity = 2;
+    public int Size { get; private set; } = 0;
+    private readonly Vector2Int[] buffer;
+
+    public InputDirBuffer()
+    {
+        buffer = new Vector2Int[capacity];
+        Size = 0;
+    }
+
+    public void AddDir(Vector2Int dir)
+    {
+        if (Size < capacity)
+        {
+            // If the new direction is the opposite or the same as the previously added one, it won't be added to the buffer
+            if (Size > 0)
+            {
+                if (new Vector2Int(Mathf.Abs(buffer[Size - 1].x) - Mathf.Abs(dir.x), Mathf.Abs(buffer[Size - 1].y) - Mathf.Abs(dir.y)).magnitude == 0)
+                {
+                    return;
+                }
+            }
+
+            buffer[Size] = dir;
+            Size++;
+        }
+    }
+
+    public Vector2Int PopDir()
+    {
+        if (Size > 0)
+        {
+            Vector2Int dir = buffer[0];
+
+            for (int i = 0; i < Size - 1; i++)
+            {
+                buffer[i] = buffer[i + 1];
+            }
+
+            Size--;
+
+            return dir;
+        }
+        else
+        {
+            return Vector2Int.zero;
+        }
+    }
+
+    public void Clear()
+    {
+        Size = 0;
+    }
+}
+
+
+
 public class PlayerController : Snake
 {
 
@@ -12,11 +72,10 @@ public class PlayerController : Snake
     private Enemy corpse = null;
 
 
-
     private bool invencible = false;
     private bool changingLevel = false;
 
-    
+    private readonly InputDirBuffer inputBuffer = new InputDirBuffer();
 
     // Start is called before the first frame update
     void Start()
@@ -31,35 +90,41 @@ public class PlayerController : Snake
         {
             if (!changingLevel)
             {
-                Vector2Int tempDir = actualDir;
-
                 CheckInput();
-
-                if ((actualDir + prevDir).magnitude == 0)
-                {
-                    actualDir = tempDir;
-                }
             }
         }
     }
 
     void CheckInput()
     {
-        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+
+        bool notMoveInput = false;
+        Vector2Int tempDir = prevDir;
+
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
         {
-            actualDir = Vector2Int.left;
+            tempDir = Vector2Int.left;
         }
-        else if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+        else if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
         {
-            actualDir = Vector2Int.up;
+            tempDir = Vector2Int.up;
         }
-        else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+        else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
         {
-            actualDir = Vector2Int.down;
+            tempDir = Vector2Int.down;
         }
-        else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+        else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
         {
-            actualDir = Vector2Int.right;
+            tempDir = Vector2Int.right;
+        }
+        else
+        {
+            notMoveInput = true;
+        }
+
+        if (!((tempDir + prevDir).magnitude == 0) && !notMoveInput)
+        {
+            inputBuffer.AddDir(tempDir);
         }
     }
 
@@ -70,12 +135,21 @@ public class PlayerController : Snake
         {
             velFrames = velCounter;
 
+            if (inputBuffer.Size > 0)
+            {
+                actualDir = inputBuffer.PopDir();
+            }
+            else
+            {
+                actualDir = prevDir;
+            }
+
             Vector2Int currentPos = new Vector2Int((int)transform.position.x, (int)transform.position.y);
             Vector2Int nextPos = new Vector2Int(currentPos.x + actualDir.x, currentPos.y + actualDir.y);
 
-            TileType nextTileType = game.world.tilemap.getTileData(nextPos).tileType;
+            TileType nextTileType = game.world.tilemap.GetTileData(nextPos).tileType;
 
-            if (nextTileType == TileType.Wall || tail.checkCollision(nextPos))
+            if (nextTileType == TileType.Wall || tail.CheckCollision(nextPos))
             {
                 if (!invencible)
                 {
@@ -91,7 +165,7 @@ public class PlayerController : Snake
 
             if (!currentPos.Equals(nextPos))
             {
-                tail.moveToHead(transform.position, transform.rotation);
+                tail.MoveToHead(transform.position, transform.rotation);
                 transform.position = new Vector3(nextPos.x, nextPos.y);
                 prevDir = actualDir;
             }
@@ -102,14 +176,16 @@ public class PlayerController : Snake
         }
     }
 
-    override protected void Restart()
+    protected override void Restart()
     {
-        Vector2Int startPos = game.world.getStartPosition();
+        Vector2Int startPos = game.world.GetStartPosition();
         transform.position = new Vector3(startPos.x, startPos.y, transform.position.z);
 
         base.Restart();
 
         invencible = false;
+
+        inputBuffer.Clear();
     }
 
     void NextWorld()
@@ -117,18 +193,18 @@ public class PlayerController : Snake
         Restart();
     }
 
-    override public void Die()
+    public override void Die()
     {
-        if (tail.getTailSize() > 0)
+        if (tail.GetTailSize() > 0)
         {
             if (corpse == null)
             {
                 corpse = Instantiate(corpsePrefab, transform.position, transform.rotation);
                 corpse.game = game;
-                tail.giveObjectsTo(corpse);
+                tail.GiveObjectsTo(corpse);
             }
 
-            tail.clearObjects();
+            tail.ClearObjects();
         }
         
         Restart();
@@ -137,13 +213,13 @@ public class PlayerController : Snake
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag.Equals("Finish"))
+        if (collision.gameObject.CompareTag("Finish"))
         {
             NextWorld();
             return;
         }
 
-        if (collision.gameObject.tag.Equals("Level"))
+        if (collision.gameObject.CompareTag("Level"))
         {
             Bounds bounds = collision.bounds;
             mainCamera.gameObject.transform.position = bounds.center + new Vector3(0, 0, mainCamera.gameObject.transform.position.z);
@@ -154,7 +230,7 @@ public class PlayerController : Snake
             return;
         }
 
-        if (collision.gameObject.tag.Equals("Object"))
+        if (collision.gameObject.CompareTag("Object"))
         {
             Object o = collision.gameObject.GetComponent<Object>();
 
@@ -167,11 +243,11 @@ public class PlayerController : Snake
                 o.inTail.snakeHead.Die();
             }
 
-            tail.addObject(o);
+            tail.AddObject(o);
             return;
         }
 
-        if (collision.gameObject.tag.Equals("Corpse") || collision.gameObject.tag.Equals("Enemy"))
+        if (collision.gameObject.CompareTag("Corpse") || collision.gameObject.CompareTag("Enemy"))
         {
             if (invencible)
             {
@@ -179,7 +255,7 @@ public class PlayerController : Snake
             }
             else
             {
-                tail.giveObjectsTo(collision.gameObject.GetComponent<Enemy>());
+                tail.GiveObjectsTo(collision.gameObject.GetComponent<Enemy>());
                 Die();
             }
         }

@@ -37,9 +37,9 @@ public class Snake : Movable
             Vector2Int currentPos = new Vector2Int((int)transform.position.x, (int)transform.position.y);
             Vector2Int nextPos = new Vector2Int(currentPos.x + actualDir.x, currentPos.y + actualDir.y);
 
-            TileType nextTileType = game.world.tilemap.getTileData(nextPos).tileType;
+            TileType nextTileType = game.world.tilemap.GetTileData(nextPos).tileType;
 
-            if (nextTileType == TileType.Wall || tail.checkCollision(nextPos))
+            if (nextTileType == TileType.Wall || tail.CheckCollision(nextPos))
             {
                 Die();
                 return;
@@ -47,7 +47,7 @@ public class Snake : Movable
 
             if (!currentPos.Equals(nextPos))
             {
-                tail.moveToHead(transform.position, transform.rotation);
+                tail.MoveToHead(transform.position, transform.rotation);
                 transform.position = new Vector3(nextPos.x, nextPos.y);
                 prevDir = actualDir;
             }
@@ -63,13 +63,13 @@ public class Snake : Movable
         base.Restart();
     }
 
-    override public void Pause()
+    public override void Pause()
     {
 
     }
 
-    virtual public void Die()
+    public virtual void Die()
     {
-        tail.clearObjects();
+        tail.ClearObjects();
     }
 }

@@ -46,11 +46,11 @@ public class World : MonoBehaviour
         }
     }
 
-    public int getLevel(Vector2Int pos)
+    public int GetLevel(Vector2Int pos)
     {
         foreach (Level level in levels)
         {
-            if (level.isInside(pos))
+            if (level.IsInside(pos))
             {
                 return level.number;
             }
@@ -59,7 +59,7 @@ public class World : MonoBehaviour
         return -1;
     }
 
-    public Vector2Int getStartPosition()
+    public Vector2Int GetStartPosition()
     {
         return new Vector2Int((int)start.transform.position.x, (int)start.transform.position.y);
     }

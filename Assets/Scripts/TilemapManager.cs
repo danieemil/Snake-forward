@@ -16,7 +16,7 @@ public class TilemapManager : MonoBehaviour
     private Vector2Int tileSize = new Vector2Int(1, 1);
 
     // Allows getting custom data from tiles
-    private Dictionary<TileBase, TileData> tilesDictionary = new Dictionary<TileBase, TileData>();
+    private readonly Dictionary<TileBase, TileData> tilesDictionary = new Dictionary<TileBase, TileData>();
 
     private void Awake()
     {
@@ -29,7 +29,7 @@ public class TilemapManager : MonoBehaviour
         }
     }
 
-    public TileData getTileData(Vector2Int pos)
+    public TileData GetTileData(Vector2Int pos)
     {
         TileBase tb = tilemap.GetTile(new Vector3Int(pos.x * tileSize.x, pos.y * tileSize.y, 0));
         return tilesDictionary[tb];

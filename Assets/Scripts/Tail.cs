@@ -23,7 +23,7 @@ public class Tail : MonoBehaviour
         }
     }
 
-    public bool checkCollision(Vector2Int pos)
+    public bool CheckCollision(Vector2Int pos)
     {
         for (int i = 0; i < objects.Count - 1; i++)
         {
@@ -38,7 +38,7 @@ public class Tail : MonoBehaviour
         return false;
     }
 
-    public void moveToHead(Vector2 headPos, Quaternion headDirection)
+    public void MoveToHead(Vector2 headPos, Quaternion headDirection)
     {
         for (int i = objects.Count - 1; i > 0; i--)
         {
@@ -53,7 +53,7 @@ public class Tail : MonoBehaviour
         }
     }
 
-    public bool objectInTail(Object obj)
+    public bool ObjectInTail(Object obj)
     {
         foreach (Object o in objects)
         {
@@ -65,7 +65,7 @@ public class Tail : MonoBehaviour
         return false;
     }
 
-    public Object getObjectType(ObjectType objType)
+    public Object GetObjectType(ObjectType objType)
     {
         foreach (Object obj in objects)
         {
@@ -78,27 +78,27 @@ public class Tail : MonoBehaviour
         return null;
     }
 
-    public void addObject(Object o)
+    public void AddObject(Object o)
     {
         int index = objects.Count;
         objects.Insert(index, o);
         o.inTail = this;
     }
 
-    public void removeObject(Object o)
+    public void RemoveObject(Object o)
     {
         objects.Remove(o);
         o.inTail = null;
     }
 
-    public void destroyObject(Object o)
+    public void DestroyObject(Object o)
     {
         objects.Remove(o);
         o.inTail = null;
         Destroy(o);
     }
 
-    public void clearObjects()
+    public void ClearObjects()
     {
         foreach (Object obj in objects)
         {
@@ -107,16 +107,16 @@ public class Tail : MonoBehaviour
         objects.Clear();
     }
 
-    public int getTailSize()
+    public int GetTailSize()
     {
         return objects.Count;
     }
 
-    public void giveObjectsTo(Snake snake)
+    public void GiveObjectsTo(Snake snake)
     {
         foreach (Object obj in objects)
         {
-            snake.tail.addObject(obj);
+            snake.tail.AddObject(obj);
         }
 
         objects.Clear();
