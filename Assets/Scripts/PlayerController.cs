@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -77,8 +78,16 @@ public class PlayerController : Snake
 
     private readonly InputDirBuffer inputBuffer = new InputDirBuffer();
 
-    // Start is called before the first frame update
-    void Start()
+    private readonly Dictionary<Vector2Int, Func<bool>> dirInputs = new Dictionary<Vector2Int, Func<bool>>()
+        {
+            {Vector2Int.up, () => Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)},
+            {Vector2Int.right, () => Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)},
+            {Vector2Int.down, () => Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)},
+            {Vector2Int.left, () => Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)}
+        };
+
+// Start is called before the first frame update
+void Start()
     {
         Restart();
     }
@@ -98,33 +107,30 @@ public class PlayerController : Snake
     void CheckInput()
     {
 
-        bool notMoveInput = false;
         Vector2Int tempDir = prevDir;
 
-        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
-        {
-            tempDir = Vector2Int.left;
-        }
-        else if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow))
-        {
-            tempDir = Vector2Int.up;
-        }
-        else if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow))
-        {
-            tempDir = Vector2Int.down;
-        }
-        else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
+        if (prevDir.Equals(Vector2Int.zero))
         {
             tempDir = Vector2Int.right;
         }
-        else
-        {
-            notMoveInput = true;
-        }
 
-        if (!((tempDir + prevDir).magnitude == 0) && !notMoveInput)
+
+        List<Vector2Int> dirs = new List<Vector2Int>();
+        dirs.Add(new Vector2Int(tempDir.y, -tempDir.x));    // Local Right
+        dirs.Add(new Vector2Int(-tempDir.y, tempDir.x));    // Local Left
+        dirs.Add(tempDir);                                  // Local Forwards
+        dirs.Add(-tempDir);                                 // Local Backwards
+
+        foreach (Vector2Int dir in dirs)
         {
-            inputBuffer.AddDir(tempDir);
+            if(dirInputs[dir]())
+            {
+                tempDir = dir;
+                if ((inputBuffer.Size > 0) || ((tempDir + prevDir).magnitude != 0))
+                {
+                    inputBuffer.AddDir(tempDir);
+                }
+            }
         }
     }
 
