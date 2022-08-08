@@ -12,6 +12,7 @@ public enum TileType
 {
     Void = 0,
     Wall = 1,
+    Door = 2,
 
 }
 

@@ -8,6 +8,8 @@ TagManager:
   - Object
   - Corpse
   - World
+  - Door
+  - Enemy
   layers:
   - Default
   - TransparentFX

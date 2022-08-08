@@ -155,7 +155,7 @@ void Start()
 
             TileType nextTileType = game.world.tilemap.GetTileData(nextPos).tileType;
 
-            if (nextTileType == TileType.Wall || tail.CheckCollision(nextPos))
+            if (nextTileType == TileType.Wall || nextTileType == TileType.Door || tail.CheckCollision(nextPos))
             {
                 if (!invencible)
                 {
@@ -221,6 +221,7 @@ void Start()
     {
         if (collision.gameObject.CompareTag("Finish"))
         {
+            tail.DestroyObjects();
             NextWorld();
             return;
         }
@@ -263,6 +264,18 @@ void Start()
             {
                 tail.GiveObjectsTo(collision.gameObject.GetComponent<Enemy>());
                 Die();
+            }
+            return;
+        }
+
+        if (collision.gameObject.CompareTag("Door"))
+        {
+            if (tail.DestroyObjectType(ObjectType.Key))
+            {
+                Vector2Int min = new Vector2Int((int)collision.bounds.min.x, (int)collision.bounds.min.y);
+                Vector2Int max = new Vector2Int((int)collision.bounds.max.x, (int)collision.bounds.max.y);
+                game.world.tilemap.RemoveDoorTiles(min, max);
+                Destroy(collision.gameObject);
             }
         }
     }

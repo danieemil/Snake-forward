@@ -65,17 +65,17 @@ public class Tail : MonoBehaviour
         return false;
     }
 
-    public Object GetObjectType(ObjectType objType)
+    public bool ObjectTypeInTail(ObjectType objType)
     {
         foreach (Object obj in objects)
         {
             if (obj.objectType == objType)
             {
-                return obj;
+                return true;
             }
         }
 
-        return null;
+        return false;
     }
 
     public void AddObject(Object o)
@@ -94,8 +94,29 @@ public class Tail : MonoBehaviour
     public void DestroyObject(Object o)
     {
         objects.Remove(o);
-        o.inTail = null;
-        Destroy(o);
+        Destroy(o.gameObject);
+    }
+
+    public bool DestroyObjectType(ObjectType ot)
+    {
+        foreach (Object obj in objects)
+        {
+            if (obj.objectType == ot)
+            {
+                DestroyObject(obj);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void DestroyObjects()
+    {
+        foreach (Object obj in objects)
+        {
+            Destroy(obj.gameObject);
+        }
+        objects.Clear();
     }
 
     public void ClearObjects()
