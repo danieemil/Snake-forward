@@ -201,13 +201,13 @@ void Start()
 
     public override void Die()
     {
-        if (tail.GetTailSize() > 0)
+        if (tail.Size > 0)
         {
             if (corpse == null)
             {
                 corpse = Instantiate(corpsePrefab, transform.position, transform.rotation);
                 corpse.game = game;
-                tail.GiveObjectsTo(corpse);
+                tail.GiveObjectsTo(corpse.tail);
             }
 
             tail.ClearObjects();
@@ -262,7 +262,7 @@ void Start()
             }
             else
             {
-                tail.GiveObjectsTo(collision.gameObject.GetComponent<Enemy>());
+                tail.GiveObjectsTo(collision.gameObject.GetComponent<Enemy>().tail);
                 Die();
             }
             return;

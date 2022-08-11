@@ -8,6 +8,21 @@ public class Tail : MonoBehaviour
 
     public Snake snakeHead = null;
 
+    public int Size
+    {
+        get
+        { 
+            return objects.Count;
+        }
+
+        private set
+        {
+
+        }
+    }
+
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -38,7 +53,7 @@ public class Tail : MonoBehaviour
         return false;
     }
 
-    public void MoveToHead(Vector2 headPos, Quaternion headDirection)
+    public void MoveToHead(Vector3 headPos, Quaternion headDirection)
     {
         for (int i = objects.Count - 1; i > 0; i--)
         {
@@ -48,30 +63,22 @@ public class Tail : MonoBehaviour
 
         if (objects.Count > 0)
         {
-            objects[0].transform.position = new Vector3(headPos.x, headPos.y, objects[0].transform.position.z);
+            objects[0].transform.position = headPos;
             objects[0].transform.rotation = headDirection;
         }
     }
 
-    public bool ObjectInTail(Object obj)
+    public bool ObjectsOfTypeInTail(ObjectType objType, int quantity = 1)
     {
-        foreach (Object o in objects)
+        for (int i = objects.Count - 1; i >= 0; i--)
         {
-            if (o == obj)
+            if (objects[i].objectType == objType)
             {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public bool ObjectTypeInTail(ObjectType objType)
-    {
-        foreach (Object obj in objects)
-        {
-            if (obj.objectType == objType)
-            {
-                return true;
+                quantity--;
+                if (quantity < 1)
+                {
+                    return true;
+                }
             }
         }
 
@@ -81,7 +88,7 @@ public class Tail : MonoBehaviour
     public void AddObject(Object o)
     {
         int index = objects.Count;
-        objects.Insert(index, o);
+        objects.Add(o);
         o.inTail = this;
     }
 
@@ -99,11 +106,16 @@ public class Tail : MonoBehaviour
 
     public bool DestroyObjectType(ObjectType ot)
     {
-        foreach (Object obj in objects)
+        for (int i = objects.Count - 1; i >= 0; i--)
         {
-            if (obj.objectType == ot)
+            if (objects[i].objectType == ot)
             {
-                DestroyObject(obj);
+                for (int y = objects.Count - 1; y > i; y--)
+                {
+                    objects[y].transform.position = objects[y - 1].transform.position;
+                    objects[y].transform.rotation = objects[y - 1].transform.rotation;
+                }
+                DestroyObject(objects[i]);
                 return true;
             }
         }
@@ -128,16 +140,11 @@ public class Tail : MonoBehaviour
         objects.Clear();
     }
 
-    public int GetTailSize()
-    {
-        return objects.Count;
-    }
-
-    public void GiveObjectsTo(Snake snake)
+    public void GiveObjectsTo(Tail t)
     {
         foreach (Object obj in objects)
         {
-            snake.tail.AddObject(obj);
+            t.AddObject(obj);
         }
 
         objects.Clear();
